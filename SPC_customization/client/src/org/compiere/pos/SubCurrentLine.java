@@ -147,7 +147,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 
 		m_table = new PosTable();
 		CScrollPane scroll = new CScrollPane(m_table);
-		m_sql = m_table.prepareTable (s_layout, s_sqlFrom, s_sqlWhere, false, s_sqlFrom) + " ORDER BY Line";
+		m_sql = m_table.prepareTable (s_layout, s_sqlFrom, s_sqlWhere, false, "ol") + " ORDER BY Line desc";
 		//	m_table.addMouseListener(this);
 		m_table.getSelectionModel().addListSelectionListener(this);
 		m_table.setColumnVisibility(m_table.getColumn(0), false);
@@ -160,8 +160,6 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		m_table.setFocusable(false);
 		m_table.setFillsViewportHeight( true ); //@Trifon
 		m_table.growScrollbars();
-		
-		
 
 		add (scroll, "growx, spanx, growy, pushy, h 200:300:");
 

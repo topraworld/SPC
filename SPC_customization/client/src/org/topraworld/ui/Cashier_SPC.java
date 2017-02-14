@@ -620,12 +620,28 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 	
 	private void addLine(){
 		
+		boolean isReturn = false;
 		String DOCUMENTNO = txtDocNo.getText().trim();
 		int  ids[] = MOrder.getAllIDs("C_ORDER", "DOCUMENTNO = '"+ DOCUMENTNO +"' AND DOCSTATUS = 'DR'", trx.getTrxName());
 		
 		if(ids.length > 0){
 			MOrder mOrder = new MOrder(ctx, ids[0], trx.getTrxName());
-			this.createTableLine(mOrder);
+			//Check whether order is type return
+			if(mOrder.getC_DocTypeTarget_ID() == 1000050)
+				isReturn = true;
+			//POS Order
+			if(!isReturn)
+				this.createTableLine(mOrder);
+			//Return
+			else{
+				//Manager Aproval
+				if(mOrder.get_ValueAsBoolean("wf_returnaproval")){
+					this.createTableLine(mOrder);
+				}else{
+					ADialog.error(0,this.frame, "MANAGER APROVAL REQUIRED!" , "It is required manager aproval to process this order!");
+				}
+			}
+			
 		}else{
 			ADialog.warn(0,this.frame, "Invalid Document No!");
 			txtDocNo.setText("");
@@ -634,7 +650,7 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 	
 	private void createTableLine(MOrder mOrder){
 		
-		//validate for already added and same payment rule for many ordera
+		//validate for already added and same payment rule for many order
 		boolean isAdded = false;
 		boolean isValidPayRule = false;
 		
