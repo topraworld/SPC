@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="storeTocounter" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT M_MOVEMENT.CREATED,M_MOVEMENT.DOCUMENTNO as "movement no",M_PRODUCT."VALUE",M_PRODUCT."NAME",M_MOVEMENTLINE.PACKQTY,AD_USER."NAME" as "Req Purson",
+(SELECT AD_USER."NAME" FROM AD_USER,M_MOVEMENT WHERE  M_MOVEMENT.UPDATEDBY=AD_USER.AD_USER_ID AND M_MOVEMENT.M_MOVEMENT_ID=$P{RECORD_ID}) as "Update purson"
+FROM M_MOVEMENT,M_PRODUCT,M_MOVEMENTLINE,AD_USER
+WHERE M_MOVEMENT.M_MOVEMENT_ID=$P{RECORD_ID}
+AND M_MOVEMENT.M_MOVEMENT_ID=M_MOVEMENTLINE.M_MOVEMENT_ID
+AND M_MOVEMENTLINE.M_PRODUCT_ID=M_PRODUCT.M_PRODUCT_ID
+AND M_MOVEMENT.DOCSTATUS='CO'
+AND M_MOVEMENT.CREATEDBY=AD_USER.AD_USER_ID]]>
+	</queryString>
+	<field name="CREATED" class="java.sql.Timestamp"/>
+	<field name="movement no" class="java.lang.String"/>
+	<field name="VALUE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="PACKQTY" class="java.math.BigDecimal"/>
+	<field name="Req Purson" class="java.lang.String"/>
+	<field name="Update purson" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="156" splitType="Stretch">
+			<image>
+				<reportElement x="28" y="0" width="78" height="67"/>
+				<imageExpression class="java.lang.String"><![CDATA["C:\\Adempiere\\Reports\\images.png"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="78" y="0" width="477" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[STATE PHARMACEUTICALS CORPORATION OF SRI LANKA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="78" y="20" width="477" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[RAJYA OSU SALA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="78" y="40" width="477" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Avissawella]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="125" width="271" height="31"/>
+				<textElement verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INVENTORY TRANSFER REPORT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="345" y="76" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[No:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="345" y="96" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="345" y="116" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Request by:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="345" y="136" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Issued by:]]></text>
+			</staticText>
+			<textField pattern="yyyy/MM/dd">
+				<reportElement x="433" y="96" width="121" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{CREATED}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="433" y="76" width="121" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{movement no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="433" y="116" width="121" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Req Purson}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="433" y="136" width="121" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Update purson}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<staticText>
+				<reportElement x="400" y="0" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ISSUED BY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="477" y="0" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[RECEIVED BY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="0" width="77" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ITEM CODE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="78" y="0" width="245" height="20"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DESCRIPTION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="323" y="0" width="77" height="20"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[QUANTITY]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="19" width="554" height="1"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="78" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{VALUE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="78" y="0" width="245" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="322" y="0" width="78" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{PACKQTY}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="422" y="19" width="55" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="487" y="19" width="55" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="-1" y="0" width="555" height="20"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Your Health is Our Concern]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

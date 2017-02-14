@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8e23ad9e-bd6c-4ce2-98a5-5bcd3ea7a3d9">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="283"/>
+	<parameter name="@student_id1" class="java.lang.String"/>
+	<parameter name="@student_id2" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select c_bpartner.c_student_id,c_bpartner.c_lastname,c_bpartner.c_initials,c_bpartner.c_initials_stand
+,c_location.address1,c_location.address2,c_location.address3,c_location.address3,c_location.city,c_bpartner_location.birthday,
+c_bpartner.referenceno,c_bpartner.c_gender,c_bpartner.registered_date
+ from c_bpartner,c_bpartner_location,c_location
+
+where c_bpartner.c_bp_group_id = 1000003
+and c_bpartner_location.c_bpartner_id= c_bpartner.c_bpartner_id
+and c_bpartner_location.c_location_id = c_location.c_location_id
+and c_bpartner.isactive = 'Y'
+and (c_bpartner.c_student_id between $P{@student_id1} and $P{@student_id2})]]>
+	</queryString>
+	<field name="c_student_id" class="java.lang.String"/>
+	<field name="c_lastname" class="java.lang.String"/>
+	<field name="c_initials" class="java.lang.String"/>
+	<field name="c_initials_stand" class="java.lang.String"/>
+	<field name="address1" class="java.lang.String"/>
+	<field name="address2" class="java.lang.String"/>
+	<field name="address3" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="birthday" class="java.sql.Timestamp"/>
+	<field name="referenceno" class="java.lang.String"/>
+	<field name="c_gender" class="java.lang.String"/>
+	<field name="registered_date" class="java.sql.Timestamp"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="560" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="356" width="100" height="20" uuid="d9c2a3c0-85b9-4e03-a092-91ac45624152"/>
+				<textFieldExpression><![CDATA[$F{c_lastname}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="455" y="356" width="100" height="20" uuid="c1dcd367-b8f7-4a5e-acad-ddfd1dfdcbc6"/>
+				<textFieldExpression><![CDATA[$F{c_student_id}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="397" width="100" height="20" uuid="d430a167-4d1a-4ff8-80d1-c364fa5ed6b6"/>
+				<textFieldExpression><![CDATA[$F{c_initials}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="433" width="100" height="20" uuid="b6cb26b4-9d23-4fbf-90de-7262c93f5739"/>
+				<textFieldExpression><![CDATA[$F{c_initials_stand}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="453" width="57" height="20" uuid="ff612a12-3545-4177-b49f-ad736cfea943"/>
+				<textFieldExpression><![CDATA[$F{address1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="169" y="453" width="100" height="20" uuid="02cbf0b7-c1a2-4837-993f-e78242959f4f"/>
+				<textFieldExpression><![CDATA[$F{address2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="484" width="100" height="20" uuid="4e34ac94-c4d1-4ff2-8e93-e4d62ad97849"/>
+				<textFieldExpression><![CDATA[$F{city}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="118" y="504" width="100" height="20" uuid="b15440fe-83b0-4f56-ac58-76af070c03da"/>
+				<textFieldExpression><![CDATA[$F{birthday}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="118" y="531" width="100" height="20" uuid="f8414ecd-7adb-424e-916d-4a87a75b7fc7"/>
+				<textFieldExpression><![CDATA[$F{referenceno}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="375" y="531" width="100" height="20" uuid="3ed95ed4-220f-46fa-9173-6395f388d7d7"/>
+				<textFieldExpression><![CDATA[$F{c_gender}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="263" y="453" width="12" height="20" uuid="00985cfe-e1b1-4b99-91fc-23a6aaf407d1"/>
+				<text><![CDATA[,]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="163" y="453" width="12" height="20" uuid="791a867e-799c-49d8-a31b-add7e024355d"/>
+				<text><![CDATA[,]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="269" y="453" width="100" height="20" uuid="cd0b7857-7de0-4726-8ba9-69dc8f4c34d8"/>
+				<textFieldExpression><![CDATA[$F{address3}]]></textFieldExpression>
+			</textField>
+			<break>
+				<reportElement x="0" y="551" width="100" height="1" uuid="a61d2f5d-a43a-404c-8f83-f4f8e0f3180e"/>
+			</break>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="58" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

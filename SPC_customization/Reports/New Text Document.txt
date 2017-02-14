@@ -1,0 +1,13 @@
+($P{@movementtype}.equals( "C-" ) ? "Customer Shipment" :
+  ($P{@movementtype}.equals( "M-" ) ? "Movement From" : 
+($P{@movementtype}.equals( "C+" ) ? "Customer Returns" :
+ ($P{@movementtype}.equals( "M+" ) ? "Movement To" : 
+($P{@movementtype}.equals( "I+" ) ? "Inventory In" :
+ ($P{@movementtype}.equals( "I-" ) ? "Inventory Out" : 
+($P{@movementtype}.equals( "V+" ) ? "Vendor Receipt" :
+ ($P{@movementtype}.equals( "V-" ) ? "Vendor Returns" : 
+($P{@movementtype}.equals( "P-" ) ? "Production -" : 
+($P{@movementtype}.equals( "P+" ) ? "Production +" :
+ ($P{@movementtype}.equals( "W-" ) ? "Work Order -" : 
+($P{@movementtype}.equals( "W+" ) ? "Work Order -" :
+ $P{@movementtype}  )  )  )  )  )  )  )  ) )  )  )  )

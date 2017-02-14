@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="720" pageHeight="866" columnWidth="720" leftMargin="0" rightMargin="0" topMargin="36" bottomMargin="36">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="@Date1" class="java.util.Date"/>
+	<parameter name="@Date2" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT NVL((sum(CASE WHEN C_ORDER.PAYMENTRULE='B' THEN C_ORDER.GRANDTOTAL END)),0) as "Cash",
+NVL((sum(CASE WHEN C_ORDER.PAYMENTRULE = 'S' THEN C_ORDER.GRANDTOTAL END)),0) as "CHECK",
+NVL((sum(CASE WHEN C_ORDER.PAYMENTRULE = 'P' THEN C_ORDER.GRANDTOTAL END)),0) as "CREDIT",
+
+AD_USER."NAME" as "Cashier",C_ORDER.DATEORDERED,C_DOCTYPE."NAME"
+
+
+FROM C_ORDER,AD_USER,C_DOCTYPE
+
+WHERE C_ORDER.C_DocType_ID in (1000046,1000050,1000047,1000051,1000054,1000055,1000053,1000052)
+
+AND C_ORDER.DOCSTATUS='CO'
+AND C_ORDER.M_PRICELIST_ID in (1000000,1000002)
+AND C_ORDER.DATEORDERED BETWEEN $P{@Date1} AND $P{@Date1}
+AND C_ORDER.UPDATEDBY=AD_USER.AD_USER_ID
+AND C_ORDER.C_DOCTYPE_ID=C_DOCTYPE.C_DOCTYPE_ID
+AND C_ORDER.AD_Client_ID=1000000
+
+GROUP BY AD_USER."NAME",C_ORDER.DATEORDERED,C_DOCTYPE."NAME"
+
+ORDER BY C_DOCTYPE."NAME",AD_USER."NAME"]]>
+	</queryString>
+	<field name="Cash" class="java.math.BigDecimal"/>
+	<field name="CHECK" class="java.math.BigDecimal"/>
+	<field name="CREDIT" class="java.math.BigDecimal"/>
+	<field name="Cashier" class="java.lang.String"/>
+	<field name="DATEORDERED" class="java.sql.Timestamp"/>
+	<field name="NAME" class="java.lang.String"/>
+	<variable name="CashSum" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{Cash}]]></variableExpression>
+	</variable>
+	<variable name="CreditSum" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT}]]></variableExpression>
+	</variable>
+	<variable name="TotalSum" class="java.math.BigDecimal">
+		<variableExpression><![CDATA[$F{Cash}+$F{CREDIT}+$F{CHECK}]]></variableExpression>
+	</variable>
+	<variable name="Total" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$V{TotalSum}]]></variableExpression>
+	</variable>
+	<variable name="checksum" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CHECK}]]></variableExpression>
+	</variable>
+	<variable name="grpcashsum" class="java.math.BigDecimal" resetType="Group" resetGroup="DocType" calculation="Sum">
+		<variableExpression><![CDATA[$F{Cash}]]></variableExpression>
+	</variable>
+	<variable name="grpcrdsum" class="java.math.BigDecimal" resetType="Group" resetGroup="DocType" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDIT}]]></variableExpression>
+	</variable>
+	<variable name="grpchksum" class="java.math.BigDecimal" resetType="Group" resetGroup="DocType" calculation="Sum">
+		<variableExpression><![CDATA[$F{CHECK}]]></variableExpression>
+	</variable>
+	<variable name="grptotal" class="java.math.BigDecimal" resetType="Group" resetGroup="DocType" calculation="Sum">
+		<variableExpression><![CDATA[$V{TotalSum}]]></variableExpression>
+	</variable>
+	<group name="DocType">
+		<groupExpression><![CDATA[$F{NAME}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement x="55" y="0" width="227" height="20"/>
+					<textElement>
+						<font size="12" isBold="true" isItalic="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="50">
+				<textField pattern="#,##0.0000">
+					<reportElement x="476" y="6" width="97" height="20"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{grptotal}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.0000">
+					<reportElement x="414" y="6" width="62" height="20"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{grpcrdsum}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.0000">
+					<reportElement x="354" y="6" width="60" height="20"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{grpchksum}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.0000">
+					<reportElement x="282" y="6" width="72" height="20"/>
+					<box>
+						<topPen lineWidth="1.0"/>
+					</box>
+					<textElement textAlignment="Right">
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{grpcashsum}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="125" splitType="Stretch">
+			<staticText>
+				<reportElement x="55" y="0" width="555" height="20"/>
+				<textElement>
+					<font fontName="Times New Roman" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[STATE PHARMACEUTICALS CORPORATION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="55" y="20" width="555" height="20"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Rajya Osu Sala , NO 40,Colombo Road , Avissawella.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="55" y="40" width="304" height="20"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cashier Wise Sales Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="55" y="85" width="66" height="20"/>
+				<textElement/>
+				<text><![CDATA[Date From :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="55" y="105" width="66" height="20"/>
+				<textElement/>
+				<text><![CDATA[Date To :]]></text>
+			</staticText>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="121" y="85" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[$P{@Date1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="121" y="105" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[$P{@Date2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="75" splitType="Stretch">
+			<staticText>
+				<reportElement x="152" y="41" width="130" height="20"/>
+				<textElement>
+					<font fontName="Cambria Math" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cashier]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="282" y="41" width="72" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Cambria Math" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cash]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="354" y="41" width="60" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Cambria Math" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Check]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="476" y="41" width="97" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Cambria Math" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="55" y="41" width="97" height="20"/>
+				<textElement>
+					<font fontName="Cambria Math" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<line>
+				<reportElement x="55" y="64" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="2.0" lineStyle="Double"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="414" y="41" width="62" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Cambria Math" size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Credit]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField pattern="yyyy/MM/dd">
+				<reportElement x="55" y="1" width="97" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{DATEORDERED}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="152" y="1" width="130" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Cashier}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.0000" isBlankWhenNull="true">
+				<reportElement x="282" y="1" width="72" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{Cash}.equals(null)? 0.00 :$F{Cash}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.0000" isBlankWhenNull="true">
+				<reportElement x="354" y="1" width="60" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CHECK}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.0000" isBlankWhenNull="true">
+				<reportElement x="476" y="1" width="97" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{TotalSum}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.0000" isBlankWhenNull="true">
+				<reportElement x="414" y="1" width="62" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CREDIT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="13" splitType="Stretch">
+			<staticText>
+				<reportElement x="55" y="0" width="181" height="13"/>
+				<textElement/>
+				<text><![CDATA[Designed by Topra (pvt)Ltd]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="27" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement x="282" y="0" width="72" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="3.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CashSum}.equals(null)? 0.00 :$V{CashSum}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="354" y="0" width="60" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="3.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{checksum}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="476" y="0" width="97" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="3.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Total}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="414" y="0" width="62" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="3.0" lineStyle="Double"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{CreditSum}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

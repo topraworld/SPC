@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="info" language="groovy" pageWidth="720" pageHeight="866" columnWidth="720" leftMargin="0" rightMargin="0" topMargin="36" bottomMargin="36">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="@date1" class="java.util.Date"/>
+	<parameter name="@date2" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT C_ORDER."UPDATED" as "Date",C_ORDER.DOCUMENTNO as "counter no",C_INVOICE.DOCUMENTNO as "Cashier no",M_PRODUCT.name as "Product",
+C_INVOICE.GRANDTOTAL,C_INVOICELINE.PRICELIST as "Unit Price",C_INVOICELINE.QTYINVOICED,
+(C_INVOICELINE.QTYINVOICED*C_INVOICELINE.PRICELIST) as "line Grand",
+((C_INVOICELINE.QTYINVOICED*C_INVOICELINE.PRICELIST)-C_INVOICELINE.LINENETAMT) as "Line Discount",
+C_INVOICELINE.LINENETAMT as "Line Net",M_PRICELIST."NAME" as "Pricelist",C_DOCTYPE."NAME"
+FROM C_ORDER,C_INVOICE,C_INVOICELINE,M_PRODUCT,M_PRICELIST,C_DOCTYPE
+WHERE
+C_ORDER.DOCSTATUS IN ('CO','VO')
+AND C_INVOICE.DOCSTATUS IN ('CO','RE')
+ AND C_ORDER.C_ORDER_ID=C_INVOICE.C_ORDER_ID
+AND C_INVOICE.C_INVOICE_ID=C_INVOICELINE.C_INVOICE_ID
+AND C_INVOICELINE.M_PRODUCT_ID=M_PRODUCT.M_PRODUCT_ID
+AND C_ORDER.C_DocType_ID IN (1000046,1000050,1000047,1000051,1000054,1000055,1000053,1000052)
+AND C_ORDER.M_Warehouse_ID IN (1000001,1000000)
+AND C_ORDER.M_PriceList_ID IN (1000000,1000002)
+AND C_ORDER.M_PRICELIST_ID=M_PRICELIST.M_PRICELIST_ID
+AND C_ORDER.C_DOCTYPE_ID=C_DOCTYPE.C_DOCTYPE_ID
+AND C_ORDER.DATEORDERED BETWEEN $P{@date1} AND $P{@date2}
+
+
+ORDER BY C_DOCTYPE."NAME",C_INVOICE.DOCUMENTNO]]>
+	</queryString>
+	<field name="Date" class="java.sql.Timestamp"/>
+	<field name="counter no" class="java.lang.String"/>
+	<field name="Cashier no" class="java.lang.String"/>
+	<field name="Product" class="java.lang.String"/>
+	<field name="GRANDTOTAL" class="java.math.BigDecimal"/>
+	<field name="Unit Price" class="java.math.BigDecimal"/>
+	<field name="QTYINVOICED" class="java.math.BigDecimal"/>
+	<field name="line Grand" class="java.math.BigDecimal"/>
+	<field name="Line Discount" class="java.math.BigDecimal"/>
+	<field name="Line Net" class="java.math.BigDecimal"/>
+	<field name="Pricelist" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<variable name="Grand Total" class="java.math.BigDecimal" resetType="Group" resetGroup="invoice" calculation="Sum">
+		<variableExpression><![CDATA[$F{line Grand}]]></variableExpression>
+	</variable>
+	<variable name="Total Dis" class="java.math.BigDecimal" resetType="Group" resetGroup="invoice" calculation="Sum">
+		<variableExpression><![CDATA[$F{Line Discount}]]></variableExpression>
+	</variable>
+	<variable name="Totalnet" class="java.math.BigDecimal" resetType="Group" resetGroup="invoice" calculation="Sum">
+		<variableExpression><![CDATA[$F{Line Net}]]></variableExpression>
+	</variable>
+	<variable name="Sum Grand" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{line Grand}]]></variableExpression>
+	</variable>
+	<variable name="Sum Dis" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{Line Discount}]]></variableExpression>
+	</variable>
+	<variable name="Sum Net" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{Line Net}]]></variableExpression>
+	</variable>
+	<group name="invoice">
+		<groupExpression><![CDATA[$F{Cashier no}]]></groupExpression>
+		<groupHeader>
+			<band/>
+		</groupHeader>
+		<groupFooter>
+			<band height="13">
+				<textField>
+					<reportElement x="135" y="0" width="53" height="12"/>
+					<textElement>
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{Cashier no}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="67" y="0" width="68" height="12"/>
+					<textElement>
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{counter no}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="263" y="0" width="59" height="12"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Total Dis}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="323" y="0" width="81" height="12"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Totalnet}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00">
+					<reportElement x="190" y="0" width="72" height="12"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8" isBold="false"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Grand Total}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="411" y="0" width="75" height="13"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{Pricelist}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="497" y="0" width="75" height="12"/>
+					<textElement textAlignment="Right">
+						<font fontName="Arial" size="8"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{NAME}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="134" splitType="Stretch">
+			<staticText>
+				<reportElement x="41" y="43" width="308" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Daily Sales Details Report (Retail)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="41" y="0" width="379" height="23"/>
+				<textElement>
+					<font fontName="Arial" size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[STATE PHARMACEUTICALS CORPORATION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="42" y="23" width="307" height="20"/>
+				<textElement>
+					<font fontName="Arial" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[No - 40 , Colombo Road, Avissawella]]></text>
+			</staticText>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="76" y="91" width="100" height="20"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[$P{@date1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="41" y="111" width="35" height="20"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[To     :]]></text>
+			</staticText>
+			<textField pattern="MMMMM dd, yyyy">
+				<reportElement x="76" y="111" width="100" height="20"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[$P{@date2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement x="323" y="0" width="81" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Net Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="263" y="0" width="59" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dis]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="67" y="0" width="68" height="20"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Order No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="135" y="0" width="53" height="20"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Invoice No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="2" width="73" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Grand Total]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="41" y="-43" width="35" height="20"/>
+				<textElement>
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[From :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="497" y="0" width="75" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Documen Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="411" y="0" width="75" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Price List]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="292" y="9" width="80" height="13"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="372" y="9" width="40" height="13"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="37" splitType="Stretch">
+			<textField pattern="#,##0.00">
+				<reportElement x="263" y="0" width="59" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Sum Dis}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="323" y="0" width="81" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Sum Net}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="190" y="0" width="72" height="20"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Sum Grand}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="RCT_Gate_Pass" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select c_invoice.dateinvoiced as "Date",
+c_order.poreference as "Cusdeck",
+c_invoice.documentno as "Invoice No",
+c_bpartner.NAME as "Consignee",
+c_order.c_order_vhno as "Vehicle No",
+c_order.description as "Container No",
+m_pricelist.NAME as "Size",
+m_attributesetinstance.serno as "Seal No"
+
+from c_invoice, c_invoiceline, m_inoutline, c_orderline, c_order, m_attributesetinstance,
+c_bpartner, m_pricelist
+
+where c_invoice.c_invoice_id= c_invoiceline.c_invoice_id
+and   c_invoiceline.m_inoutline_id= m_inoutline.m_inoutline_id
+and   m_inoutline.c_orderline_id= c_orderline.c_orderline_id
+and   c_orderline.c_order_id= c_order.c_order_id
+and   c_order.c_bpartner_id= c_bpartner.c_bpartner_id
+and   c_order.m_pricelist_id= m_pricelist.m_pricelist_id
+and   c_invoiceline.m_attributesetinstance_id= m_attributesetinstance.m_attributesetinstance_id
+and   m_attributesetinstance.serno is not null
+
+and   c_invoice.c_invoice_id = $P{RECORD_ID}
+and   c_invoice.docstatus='CO'
+and   c_invoice.ispaid='Y']]>
+	</queryString>
+	<field name="Date" class="java.sql.Timestamp"/>
+	<field name="Cusdeck" class="java.lang.String"/>
+	<field name="Invoice No" class="java.lang.String"/>
+	<field name="Consignee" class="java.lang.String"/>
+	<field name="Vehicle No" class="java.lang.String"/>
+	<field name="Container No" class="java.lang.String"/>
+	<field name="Size" class="java.lang.String"/>
+	<field name="Seal No" class="java.lang.String"/>
+	<group name="New" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{Container No}]]></groupExpression>
+		<groupHeader>
+			<band height="32"/>
+		</groupHeader>
+		<groupFooter>
+			<band height="94">
+				<staticText>
+					<reportElement x="331" y="36" width="89" height="27"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Out Time]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="2" y="66" width="217" height="27"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Authorised by:  .............................................]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="331" y="66" width="222" height="27"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Checked by:                 .................................]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="420" y="36" width="8" height="27"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<text><![CDATA[:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="1" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="228" splitType="Stretch">
+			<staticText>
+				<reportElement x="420" y="102" width="8" height="20"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="159" width="217" height="19"/>
+				<textElement>
+					<font size="9" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Tele: 011-24625400]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="140" width="217" height="19"/>
+				<textElement>
+					<font size="9" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Orugodawatta.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="140" width="80" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[C.H No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="144" width="8" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="184" width="80" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Invoice No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="121" width="8" height="23"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="178" width="217" height="19"/>
+				<textElement>
+					<font size="9" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Fax:  011-24625442]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="121" width="217" height="19"/>
+				<textElement>
+					<font size="9" isBold="false"/>
+				</textElement>
+				<text><![CDATA[No.246, Avissawella Road, ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="122" width="80" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cusdec No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="184" width="8" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="100" width="80" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="162" width="80" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ref No. RCT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="102" width="217" height="19"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rank Container Terminals [Pvt] Limited]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="166" width="8" height="22"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="2" width="555" height="29"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rank Container Terminals (Pvt.) Ltd.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="58" width="555" height="23"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[GATE PASS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="31" width="555" height="27"/>
+				<textElement textAlignment="Center">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[C.C.S.U]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="208" width="71" height="20"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Consignee ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="73" y="208" width="8" height="20"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField pattern="dd-MMM-yyyy">
+				<reportElement x="428" y="102" width="127" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.sql.Timestamp"><![CDATA[$F{Date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="428" y="124" width="127" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Cusdeck}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="428" y="186" width="127" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Invoice No}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="113" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Vehicle No}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="226" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Container No}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="339" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Size}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="455" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Seal No}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.Integer"><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="38" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

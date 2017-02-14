@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DiscountedItems" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="@date1" class="java.util.Date"/>
+	<parameter name="@date2" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT C_ORDER.DATEORDERED as "Date",C_ORDER.DOCUMENTNO as "counter no",C_INVOICE.DOCUMENTNO as "Cashier no",
+C_INVOICE.GRANDTOTAL,
+sum(C_INVOICELINE.QTYINVOICED*C_INVOICELINE.PRICELIST) as "Total Net",
+sum((C_INVOICELINE.QTYINVOICED*C_INVOICELINE.PRICELIST)-C_INVOICELINE.LINENETAMT) as "Total Discount",
+M_PRICELIST."NAME" as "Pricelist",C_DOCTYPE."NAME" as "DocStstus",
+AD_CLIENT.name as "Client",C_LOCATION.ADDRESS1,C_LOCATION.ADDRESS2,C_LOCATION.CITY,AD_USER."NAME" as "User",
+C_ORDER.DOCSTATUS as "Orderdocstatus",C_INVOICE.DOCSTATUS as "Invoicedocstatus"
+
+
+
+FROM C_ORDER,C_INVOICE,C_INVOICELINE,M_PRICELIST,C_DOCTYPE, AD_CLIENT,C_LOCATION,AD_ORG,AD_ORGINFO,AD_USER
+WHERE
+C_ORDER.DOCSTATUS IN ('CO')
+AND C_INVOICE.DOCSTATUS IN ('CO')
+ AND C_ORDER.C_ORDER_ID=C_INVOICE.C_ORDER_ID
+AND C_INVOICE.C_INVOICE_ID=C_INVOICELINE.C_INVOICE_ID
+
+
+AND C_ORDER.M_Warehouse_ID IN (1000001,1000000)
+AND C_ORDER.M_PriceList_ID IN (1000000,1000002)
+AND C_ORDER.M_PRICELIST_ID=M_PRICELIST.M_PRICELIST_ID
+AND C_ORDER.C_DOCTYPE_ID=C_DOCTYPE.C_DOCTYPE_ID
+AND AD_CLIENT.AD_CLIENT_ID=AD_ORG.AD_CLIENT_ID
+AND AD_ORGINFO.AD_ORG_ID=AD_ORG.AD_ORG_ID
+AND AD_ORGINFO.C_LOCATION_ID=C_LOCATION.C_LOCATION_ID
+AND AD_CLIENT.AD_CLIENT_ID=C_ORDER.AD_CLIENT_ID
+AND C_ORDER.CREATEDBY=AD_USER.AD_USER_ID
+AND AD_CLIENT.AD_CLIENT_ID=1000000
+AND C_ORDER.C_DocType_ID IN (1000046,1000050,1000047,1000051,1000054,1000055,1000053,1000052)
+AND C_ORDER.DATEORDERED BETWEEN  $P{@date1} AND $P{@date2}
+
+
+GROUP BY C_ORDER.DOCUMENTNO,C_INVOICE.DOCUMENTNO,C_INVOICE.GRANDTOTAL,
+C_ORDER.DATEORDERED,M_PRICELIST."NAME",C_DOCTYPE."NAME",AD_CLIENT.name,
+C_LOCATION.ADDRESS1,C_LOCATION.ADDRESS2,C_LOCATION.CITY,AD_USER."NAME",
+C_ORDER.DOCSTATUS,C_INVOICE.DOCSTATUS
+
+ORDER BY C_DOCTYPE."NAME",C_ORDER.DOCUMENTNO]]>
+	</queryString>
+	<field name="Date" class="java.sql.Timestamp"/>
+	<field name="counter no" class="java.lang.String"/>
+	<field name="Cashier no" class="java.lang.String"/>
+	<field name="GRANDTOTAL" class="java.math.BigDecimal"/>
+	<field name="Total Net" class="java.math.BigDecimal"/>
+	<field name="Total Discount" class="java.math.BigDecimal"/>
+	<field name="Pricelist" class="java.lang.String"/>
+	<field name="DocStstus" class="java.lang.String"/>
+	<field name="Client" class="java.lang.String"/>
+	<field name="ADDRESS1" class="java.lang.String"/>
+	<field name="ADDRESS2" class="java.lang.String"/>
+	<field name="CITY" class="java.lang.String"/>
+	<field name="User" class="java.lang.String"/>
+	<field name="Orderdocstatus" class="java.lang.String"/>
+	<field name="Invoicedocstatus" class="java.lang.String"/>
+	<variable name="GRANDTOTAL_2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{GRANDTOTAL}]]></variableExpression>
+	</variable>
+	<variable name="Total Discount_2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{Total Discount}]]></variableExpression>
+	</variable>
+	<variable name="Total Net_2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{Total Net}]]></variableExpression>
+	</variable>
+	<variable name="count" class="java.lang.Integer" resetType="Group" resetGroup="Doc Type" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{counter no}]]></variableExpression>
+	</variable>
+	<variable name="Total Net_1" class="java.math.BigDecimal" resetType="Group" resetGroup="Doc Type" calculation="Sum">
+		<variableExpression><![CDATA[$F{Total Net}]]></variableExpression>
+	</variable>
+	<variable name="Total Discount_1" class="java.math.BigDecimal" resetType="Group" resetGroup="Doc Type" calculation="Sum">
+		<variableExpression><![CDATA[$F{Total Discount}]]></variableExpression>
+	</variable>
+	<variable name="GRANDTOTAL_1" class="java.math.BigDecimal" resetType="Group" resetGroup="Doc Type" calculation="Sum">
+		<variableExpression><![CDATA[$F{GRANDTOTAL}]]></variableExpression>
+	</variable>
+	<variable name="count_1" class="java.lang.Integer" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{counter no}]]></variableExpression>
+	</variable>
+	<group name="Doc Type">
+		<groupExpression><![CDATA[$F{DocStstus}]]></groupExpression>
+		<groupHeader>
+			<band/>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="351" height="20" backcolor="#FFFFFF"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA["Total of "+$F{DocStstus}+" (Count) = "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement mode="Opaque" x="209" y="0" width="142" height="20" backcolor="#FFFFFF"/>
+					<textElement/>
+					<textFieldExpression class="java.lang.String"><![CDATA[$V{count}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="163" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="555" height="20"/>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{Client}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="20" width="555" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{ADDRESS1}+', '+$F{ADDRESS2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="40" width="555" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CITY}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="71" width="555" height="20"/>
+				<textElement>
+					<font size="14" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Daily Sales Transaction Counting Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="102" width="39" height="20"/>
+				<textElement/>
+				<text><![CDATA[From :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="122" width="39" height="20"/>
+				<textElement/>
+				<text><![CDATA[To :]]></text>
+			</staticText>
+			<textField pattern="yyyy/MM/dd">
+				<reportElement x="39" y="102" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[$P{@date1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy/MM/dd">
+				<reportElement x="39" y="122" width="100" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.util.Date"><![CDATA[$P{@date2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="194" height="20"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Designed by Topra(pvt)Ltd]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="209" y="0" width="66" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<bottomPen lineWidth="1.0" lineStyle="Double"/>
+				</box>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.Integer"><![CDATA[$V{count_1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

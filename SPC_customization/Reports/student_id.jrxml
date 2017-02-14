@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="student_id" language="groovy" pageWidth="244" pageHeight="151" orientation="Landscape" columnWidth="204" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="11e831ea-1db6-40a2-a00d-2569282c2dc2">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="48"/>
+	<style name="style1"/>
+	<parameter name="@c_bpartner_id" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[select c_bpartner.c_student_id,c_bpartner.referenceno,ad_image.imageurl,current_date,
+UPPER(c_bpartner.name2)
+
+from c_bpartner,ad_image
+
+where
+C_BPartner.C_BPartner_ID = $P{@c_bpartner_id}
+and c_bpartner.logo_id = ad_image.ad_image_id]]>
+	</queryString>
+	<field name="c_student_id" class="java.lang.String"/>
+	<field name="referenceno" class="java.lang.String"/>
+	<field name="imageurl" class="java.lang.String"/>
+	<field name="date" class="java.sql.Date"/>
+	<field name="upper" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="111" splitType="Stretch">
+			<textField>
+				<reportElement x="82" y="69" width="100" height="16" uuid="2930a199-3715-4c1f-8f6b-021e2dc0be00"/>
+				<textElement>
+					<font fontName="Britannic Bold" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{c_student_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="82" y="82" width="100" height="13" uuid="482cf67b-0e23-4146-8b75-58193373dfc0"/>
+				<textElement>
+					<font fontName="Britannic Bold" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{referenceno}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="82" y="94" width="100" height="13" uuid="619f1336-e72d-4246-a486-6a37c7087fdb"/>
+				<textElement>
+					<font fontName="Britannic Bold" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{date}]]></textFieldExpression>
+			</textField>
+			<image scaleImage="FillFrame">
+				<reportElement stretchType="RelativeToBandHeight" x="16" y="-5" width="46" height="59" forecolor="#FFFFFF" uuid="2bd655e8-935d-4a81-995a-c813465d3fae"/>
+				<imageExpression><![CDATA[$F{imageurl}]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="15" y="57" width="188" height="13" uuid="0578fa20-a04d-4fdb-bd12-23e0dc219e26"/>
+				<textElement>
+					<font fontName="Cooper Black" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{upper}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="-14" y="0" width="36" height="107" uuid="8e9504ed-2564-443c-ba52-a442bd6ff359"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="true" checksumRequired="false" rotation="Right">
+					<jr:codeExpression><![CDATA[$F{c_student_id}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

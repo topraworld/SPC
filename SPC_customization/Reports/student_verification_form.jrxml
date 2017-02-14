@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8e23ad9e-bd6c-4ce2-98a5-5bcd3ea7a3d9">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="@Date1" class="java.sql.Timestamp"/>
+	<parameter name="@Date2" class="java.sql.Timestamp"/>
+	<parameter name="@student_id1" class="java.lang.String"/>
+	<parameter name="@student_id2" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select c_bpartner.c_student_id,c_bpartner.c_lastname,c_bpartner.c_initials,c_bpartner.c_initials_stand
+,c_location.address1,c_location.address2,c_location.address3,c_location.address3,c_location.city,c_bpartner_location.birthday,
+c_bpartner.referenceno,c_bpartner.c_gender,c_bpartner.registered_date
+ from c_bpartner,c_bpartner_location,c_location
+
+where c_bpartner.c_bp_group_id = 1000003
+and c_bpartner_location.c_bpartner_id= c_bpartner.c_bpartner_id
+and c_bpartner_location.c_location_id = c_location.c_location_id
+and c_bpartner.isactive = 'Y'
+and c_bpartner.registered_date between $P{@Date1} and $P{@Date2}
+
+
+]]>
+	</queryString>
+	<field name="c_student_id" class="java.lang.String"/>
+	<field name="c_lastname" class="java.lang.String"/>
+	<field name="c_initials" class="java.lang.String"/>
+	<field name="c_initials_stand" class="java.lang.String"/>
+	<field name="address1" class="java.lang.String"/>
+	<field name="address2" class="java.lang.String"/>
+	<field name="address3" class="java.lang.String"/>
+	<field name="city" class="java.lang.String"/>
+	<field name="birthday" class="java.sql.Timestamp"/>
+	<field name="referenceno" class="java.lang.String"/>
+	<field name="c_gender" class="java.lang.String"/>
+	<field name="registered_date" class="java.sql.Timestamp"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="4" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="124" splitType="Stretch">
+			<staticText>
+				<reportElement x="71" y="96" width="483" height="25" uuid="60d33498-6777-4b42-a5b4-907f162e2987"/>
+				<textElement>
+					<font size="14" isBold="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[Verification of Additions to the AAT Student Registration Database]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="71" y="63" width="483" height="23" uuid="e566cdff-644e-4589-b380-d83aef3d74f0"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Fax-2559299 Email-registration@aatsl.lk]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="71" y="32" width="483" height="25" uuid="6b37eae0-0408-4111-a9d0-37be5febec03"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[AAT Centre,No.540,Ven.Muruththettuwe Ananda Nahimi Mw,Narahenpita,Colombo 05,Sri Lanka]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="71" y="7" width="483" height="25" uuid="ec5f9a24-ae93-4be4-a83b-cb7b7bce3bea"/>
+				<textElement>
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[Assocoation of Accounting Technicians of Sri Lanka]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="71" y="50" width="483" height="25" uuid="737b2c77-5fca-41ff-9ba2-183af427a677"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Tel-2559669,2595857,Business School 2559670,Examination Division 2559672]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="194" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="0" width="100" height="20" uuid="d9c2a3c0-85b9-4e03-a092-91ac45624152"/>
+				<textFieldExpression><![CDATA[$F{c_lastname}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="455" y="0" width="100" height="20" uuid="c1dcd367-b8f7-4a5e-acad-ddfd1dfdcbc6"/>
+				<textFieldExpression><![CDATA[$F{c_student_id}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="31" width="100" height="20" uuid="d430a167-4d1a-4ff8-80d1-c364fa5ed6b6"/>
+				<textFieldExpression><![CDATA[$F{c_initials}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="62" width="100" height="20" uuid="b6cb26b4-9d23-4fbf-90de-7262c93f5739"/>
+				<textFieldExpression><![CDATA[$F{c_initials_stand}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="94" width="57" height="20" uuid="ff612a12-3545-4177-b49f-ad736cfea943"/>
+				<textFieldExpression><![CDATA[$F{address1}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="149" y="94" width="100" height="20" uuid="02cbf0b7-c1a2-4837-993f-e78242959f4f"/>
+				<textFieldExpression><![CDATA[$F{address2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="114" width="100" height="20" uuid="4e34ac94-c4d1-4ff2-8e93-e4d62ad97849"/>
+				<textFieldExpression><![CDATA[$F{city}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement x="98" y="134" width="100" height="20" uuid="b15440fe-83b0-4f56-ac58-76af070c03da"/>
+				<textFieldExpression><![CDATA[$F{birthday}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="98" y="161" width="100" height="20" uuid="f8414ecd-7adb-424e-916d-4a87a75b7fc7"/>
+				<textFieldExpression><![CDATA[$F{referenceno}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="355" y="161" width="100" height="20" uuid="3ed95ed4-220f-46fa-9173-6395f388d7d7"/>
+				<textFieldExpression><![CDATA[$F{c_gender}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="90" height="20" uuid="88848fae-b6e7-4e8a-9b12-67561a777699"/>
+				<text><![CDATA[Last Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="31" width="90" height="20" uuid="79bfceda-89ba-421a-bceb-d432eedd1b20"/>
+				<text><![CDATA[Initials]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="62" width="90" height="20" uuid="cfb7bfb5-f8e8-4050-bca0-4a3645ff23b8"/>
+				<text><![CDATA[Initials Stand For]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="94" width="90" height="20" uuid="e9446ddc-f7e9-4702-9cc1-d072fbbc64c4"/>
+				<text><![CDATA[Permanent Address]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="134" width="90" height="20" uuid="ce368fe2-3952-49f8-8c82-844b6d32a746"/>
+				<text><![CDATA[Date of Birth]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="162" width="90" height="20" uuid="83ac41cb-d901-49f3-935b-ed0f1646ac65"/>
+				<text><![CDATA[NIC Number]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="409" y="0" width="46" height="20" uuid="43aa5d7d-2cff-4287-bec8-d817a8e3064b"/>
+				<text><![CDATA[REG.NO]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="161" width="24" height="20" uuid="74a906b4-7b58-4d5f-a20a-68d649be84e0"/>
+				<text><![CDATA[Sex]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="243" y="94" width="12" height="20" uuid="00985cfe-e1b1-4b99-91fc-23a6aaf407d1"/>
+				<text><![CDATA[,]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="143" y="94" width="12" height="20" uuid="791a867e-799c-49d8-a31b-add7e024355d"/>
+				<text><![CDATA[,]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="249" y="94" width="100" height="20" uuid="cd0b7857-7de0-4726-8ba9-69dc8f4c34d8"/>
+				<textFieldExpression><![CDATA[$F{address3}]]></textFieldExpression>
+			</textField>
+			<break>
+				<reportElement x="0" y="182" width="100" height="1" uuid="a61d2f5d-a43a-404c-8f83-f4f8e0f3180e"/>
+			</break>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="58" splitType="Stretch">
+			<staticText>
+				<reportElement x="19" y="29" width="136" height="28" uuid="c3b96402-0631-4fd9-a592-c3c8ebbf9598"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Director
+(Registration & Membership]]></text>
+			</staticText>
+			<image>
+				<reportElement x="58" y="0" width="56" height="37" uuid="8c5c8807-3d9f-4a07-8780-a6412f03b35c"/>
+				<box>
+					<pen lineColor="#FFFFFF"/>
+					<topPen lineColor="#FFFFFF"/>
+					<leftPen lineColor="#FFFFFF"/>
+					<bottomPen lineColor="#FFFFFF"/>
+					<rightPen lineColor="#FFFFFF"/>
+				</box>
+				<imageExpression><![CDATA["C:\\Adempiere\\Reports\\Director Signation-Student&Membership.jpg"]]></imageExpression>
+			</image>
+			<line>
+				<reportElement x="43" y="28" width="100" height="1" uuid="2e2dff92-83b8-40a1-b49b-333806ab8996"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="249" y="28" width="136" height="28" uuid="0212b5e5-382a-43c1-aba2-265ec4fbe796"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Student Signature]]></text>
+			</staticText>
+			<line>
+				<reportElement x="245" y="27" width="142" height="1" uuid="b10e4048-75ea-4eaa-9c58-597eb02aa9cd"/>
+				<graphicElement>
+					<pen lineStyle="Dashed"/>
+				</graphicElement>
+			</line>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

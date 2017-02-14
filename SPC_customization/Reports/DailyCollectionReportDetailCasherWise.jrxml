@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DailyCollectionReportDetailCasherWise" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="@ad_client_id" class="java.math.BigDecimal"/>
+	<parameter name="@ad_user_id" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[Select MAX(AD_USER.AD_USER_ID) USER_ID,  MAX(AD_USER.NAME )  Cashier,
+max(C_DOCTYPE.C_DOCTYPE_ID)DOC_TYPE_ID,MAX(C_DOCTYPE.NAME)DOC_TYPE,
+MAX(AD_CLIENT.DESCRIPTION ) company,
+C_ORDER.C_ORDER_ID,
+C_ORDER.DOCUMENTNO AS DOC_NO ,
+
+SUM(case when C_ORDER.PAYMENTRULE = 'B' Then C_ORDERLINE.QTYORDERED* C_ORDERLINE.PRICEACTUAL else 0 end) cashamount ,
+SUM( case when C_ORDER.PAYMENTRULE <> 'B' Then C_ORDERLINE.QTYORDERED* C_ORDERLINE.PRICEACTUAL else 0 end ) creditamount
+
+from c_order,AD_USER,C_DOCTYPE,C_ORDERLINE,M_PRODUCT,M_PRODUCT_CATEGORY,ad_client
+
+where C_ORDER.UPDATEDBY = AD_USER.AD_USER_ID
+AND C_ORDER.C_DOCTYPE_ID = C_DOCTYPE.C_DOCTYPE_ID
+AND C_ORDER.C_ORDER_ID=C_ORDERLINE.C_ORDER_ID
+AND C_ORDERLINE.M_PRODUCT_ID=M_PRODUCT.M_PRODUCT_ID
+AND M_PRODUCT.M_PRODUCT_CATEGORY_ID=M_PRODUCT_CATEGORY.M_PRODUCT_CATEGORY_ID
+AND c_doctype.docsubtypeso = 'WR'
+AND C_ORDER.ISSOTRX = 'Y'
+AND M_PRODUCT_CATEGORY.NAME<>'Consultation'
+AND (C_ORDER.DOCSTATUS='CL' OR C_ORDER.DOCSTATUS='CO')
+AND ad_client.AD_CLIENT_ID= $P!{@ad_client_id}
+
+
+
+
+GROUP BY AD_USER.AD_USER_ID, AD_USER.NAME,  C_DOCTYPE.NAME,C_ORDER.C_ORDER_ID, C_ORDER.DOCUMENTNO
+
+ORDER BY AD_USER.AD_USER_ID, AD_USER.NAME, C_DOCTYPE.NAME, C_ORDER.C_ORDER_ID, C_ORDER.DOCUMENTNO]]>
+	</queryString>
+	<field name="USER_ID" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="CASHIER" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="DOC_TYPE_ID" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="DOC_TYPE" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="COMPANY" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="C_ORDER_ID" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="DOC_NO" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="CASHAMOUNT" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="CREDITAMOUNT" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<variable name="Cash_grouptotal" class="java.math.BigDecimal" resetType="Group" resetGroup="DOCUMENT TYPE" calculation="Sum">
+		<variableExpression><![CDATA[$F{CASHAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="Credit_grouptotal" class="java.math.BigDecimal" resetType="Group" resetGroup="DOCUMENT TYPE" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDITAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="GtotCash" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CASHAMOUNT}]]></variableExpression>
+	</variable>
+	<variable name="GtotCredit" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{CREDITAMOUNT}]]></variableExpression>
+	</variable>
+	<group name="DOCUMENT TYPE">
+		<groupExpression><![CDATA[$F{DOC_TYPE}]]></groupExpression>
+		<groupHeader>
+			<band height="47">
+				<textField>
+					<reportElement x="2" y="6" width="123" height="20"/>
+					<textElement>
+						<font size="12" isBold="true" isUnderline="true"/>
+					</textElement>
+					<textFieldExpression class="java.lang.String"><![CDATA[$F{DOC_TYPE}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="19" y="26" width="75" height="20"/>
+					<textElement>
+						<font size="11" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Document No]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="234" y="26" width="159" height="20"/>
+					<textElement textAlignment="Right">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Cash]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="395" y="27" width="159" height="20"/>
+					<textElement textAlignment="Right">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Credit Card]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="37">
+				<staticText>
+					<reportElement x="3" y="10" width="109" height="20"/>
+					<textElement>
+						<font size="11" isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Total]]></text>
+				</staticText>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="234" y="9" width="159" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Cash_grouptotal}]]></textFieldExpression>
+				</textField>
+				<textField pattern="#,##0.00;(#,##0.00)">
+					<reportElement x="395" y="9" width="159" height="20"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{Credit_grouptotal}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="32" width="554" height="1"/>
+				</line>
+				<line>
+					<reportElement x="1" y="4" width="554" height="1"/>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="3" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="91" splitType="Stretch">
+			<staticText>
+				<reportElement x="2" y="25" width="319" height="22"/>
+				<textElement textAlignment="Left">
+					<font size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Daily Collection Detail Report Cashier Wise]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="68" width="45" height="20"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cashier :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="47" y="68" width="163" height="20"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{CASHIER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="47" width="26" height="20"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[From]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="84" y="48" width="15" height="20"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<line>
+				<reportElement x="1" y="89" width="554" height="1"/>
+			</line>
+			<textField>
+				<reportElement x="1" y="3" width="413" height="20"/>
+				<textElement textAlignment="Left">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{COMPANY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd MMMMM yyyy">
+				<reportElement x="458" y="22" width="95" height="22"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="427" y="22" width="31" height="22"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Date :]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="19" y="2" width="75" height="20"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DOC_NO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="234" y="2" width="159" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CASHAMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="395" y="2" width="159" height="19"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$F{CREDITAMOUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="30" splitType="Stretch">
+			<textField evaluationTime="Report">
+				<reportElement x="514" y="11" width="40" height="13"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="434" y="11" width="80" height="13"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="0" width="234" height="24"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Daily Collection Detail Report Cashier Wise]]></text>
+			</staticText>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="3" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="51" splitType="Stretch">
+			<staticText>
+				<reportElement x="3" y="1" width="146" height="20"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ TOTAL COLLECTION]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="234" y="1" width="159" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{GtotCash}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="395" y="1" width="159" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[$V{GtotCredit}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="2" y="43" width="554" height="1"/>
+			</line>
+			<line>
+				<reportElement x="2" y="46" width="554" height="1"/>
+			</line>
+			<staticText>
+				<reportElement x="2" y="23" width="200" height="20"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sum (Cash + Credit Card )]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;(#,##0.00)">
+				<reportElement x="396" y="23" width="159" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.math.BigDecimal"><![CDATA[new BigDecimal ($V{GtotCash}.doubleValue() + $V{GtotCredit}.doubleValue())]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>
