@@ -67,6 +67,7 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 	private JFormattedTextField f_tax;
 	private JFormattedTextField f_total;
 	private CButton 		bpartner;
+
 	private CTextField discount;
 	private MBPartner	m_bpartner;
 	private int			m_M_PriceList_Version_ID = 0;
@@ -78,9 +79,9 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 	private final String[] c_bparterTypes1 = { "GENERAL", "SPECIAL", "PREGNANT", "CHILD" , "SENIOR"};
 	private final String[] c_bparterTypes2 = { "SPECIAL", "PREGNANT", "CHILD" , "SENIOR"};
 	private static CLogger log = CLogger.getCLogger(SubOrder.class);
-	
 	boolean isReturn = false;
-	
+	private int bp_id = 0;
+
 	public void init()
 	{	
 		//	Content
@@ -228,9 +229,8 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 				return;
 			//	New
 			if (action.equals("New"))
-			{
-				//new BpTypes().show();
-				int bp_id = this.showBpartners(c_bparterTypes1);
+			{	
+				new BpTypes(this.p_posPanel , c_bparterTypes1).show();
 				order_type.setText("Customer Cash Order");
 				order_type.setForeground(Color.BLUE);
 				p_posPanel.newOrder("O" ,  bp_id);
@@ -238,7 +238,7 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 				return;
 			}else if(action.equals("Credit")){
 				
-				int bp_id = this.showBpartners(c_bparterTypes2);
+				new BpTypes(this.p_posPanel , c_bparterTypes2).show();
 				order_type.setText("Card Payment Order");
 				order_type.setForeground(Color.BLUE);
 				p_posPanel.newOrder("Cr" ,  bp_id);
@@ -264,7 +264,7 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 				return;
 			//for customer return type	
 			}else if(action.equals("Reset")){
-				int bp_id = this.showBpartners(c_bparterTypes1);
+				new BpTypes(this.p_posPanel , c_bparterTypes2).show();
 				order_type.setText("Customer Return");
 				order_type.setForeground(Color.RED);
 				p_posPanel.newOrder("R" , bp_id);
@@ -272,13 +272,12 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 			}else if(action.equals("bpartner")){
 				
 				if(p_posPanel.m_order != null){
-					
 					//check for card type or not using price list
-					int bp_id = 0;
-					if(p_posPanel.m_order.getM_PriceList_ID() == 1016582)
-						bp_id = this.showBpartners(c_bparterTypes2);
-					else
-						bp_id = this.showBpartners(c_bparterTypes1);
+					if(p_posPanel.m_order.getM_PriceList_ID() == 1016582){
+						new BpTypes(this.p_posPanel , c_bparterTypes2).show();
+					}else{
+						new BpTypes(this.p_posPanel , c_bparterTypes2).show();
+					}
 					
 					p_posPanel.m_order.setC_BPartner_ID(bp_id);
 					MBPartner mbPartner = MBPartner.get(p_ctx, bp_id);
@@ -312,7 +311,8 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 		
 		//void instead of delete
 		if(ADialog.ask(0, this, "Do you want to void the record?")){
-			MOrder mOrder = p_posPanel.m_order;
+			MOrder mOrder = new MOrder(p_posPanel.getCtx(), p_posPanel.m_order.get_ID(), p_posPanel.getTrxName());
+			
 			if(mOrder.getDocStatus().equals(X_C_Order.DOCSTATUS_Drafted)){
 				
 				mOrder.setDocStatus(X_C_Order.DOCACTION_Void);
@@ -332,53 +332,9 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 				f_breturn.setEnabled(true);
 			}
 			else{
-				ADialog.error(0, this, "Order Processed. You are not allowed to void!");
+				ADialog.error(0, this, "Order Processed.","You are not allowed to void!");
 			}
 		}
-	}
-	
-	private int showBpartners(String[] c_bparterTypes){
-		
-	    int i = JOptionPane.showOptionDialog(null, "Select type of customer:", "Customer Selection",
-	        JOptionPane.WARNING_MESSAGE, 0, null, c_bparterTypes, c_bparterTypes[0]);
-	    
-	    int bp_id = 0;
-	    //get selected bpartner and set to
-	    
-	    //for credit card bpartner ids
-	    if(c_bparterTypes.length == 4){
-	    	
-		    if(i == 0){
-		    	bp_id = 1001444;//special
-		    }else if(i == 1){
-		    	bp_id = 1000005;//pregnent
-		    }else if(i == 2){
-		    	bp_id = 1001443;//CHILD
-		    }else if(i == 3){
-		    	bp_id = 1000004;//SENIOR
-		    }else{
-		    	ADialog.error(0, this, "Please selecta a customer type!");	
-		    	this.showBpartners(c_bparterTypes);
-		    }
-	    	
-	    }else{
-	    	if(i == 0){
-		    	bp_id = 1000003;//general
-		    }else if(i == 1){
-		    	bp_id = 1001444;//special
-		    }else if(i == 2){
-		    	bp_id = 1000005;//pregnent
-		    }else if(i == 3){
-		    	bp_id = 1001443;//CHILD
-		    }else if(i == 4){
-		    	bp_id = 1000004;//SENIOR
-		    }else{
-		    	ADialog.error(0, this, "Please selecta a customer type!");	
-		    	this.showBpartners(c_bparterTypes);
-		    }
-	    }
-	    bpartner.setText(c_bparterTypes[i]);
-	    return bp_id;
 	}
 	
 	public void focusGained (FocusEvent e)
@@ -505,8 +461,8 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 			{	
 				//To get two prints
 				ReportCtl.startDocumentPrint(ReportEngine.ORDER, p_posPanel.m_order.getC_Order_ID(), null, Env.getWindowNo(this), true);
-				int id = MPrintFormat.getPrintFormat_ID("Barcode", MOrder.Table_ID, Env.getAD_Client_ID(p_ctx));
-				MPrintFormat mPrintFormat = new MPrintFormat(p_ctx, id, p_posPanel.m_order.get_TrxName());
+				//int id = MPrintFormat.getPrintFormat_ID("Barcode", MOrder.Table_ID, Env.getAD_Client_ID(p_ctx));
+				MPrintFormat mPrintFormat = new MPrintFormat(p_ctx, 1000084, p_posPanel.m_order.get_TrxName());
 				ReportCtl.startDocumentPrint(p_posPanel.getWindowNo(), mPrintFormat, p_posPanel.m_order.get_ID(), null, 0, "");
 				
 				//Disable the order after get print
@@ -596,6 +552,18 @@ public class SubOrder extends PosSubPanel implements ActionListener, FocusListen
 			order.saveEx();
 		}
 		p_posPanel.f_curLine.f_name.requestFocusInWindow();
+	}
+	
+	public int getBp_id() {
+		return bp_id;
+	}
+
+	public void setBp_id(int bp_id) {
+		this.bp_id = bp_id;
+	}
+	
+	public CButton getBpartner() {
+		return this.bpartner;
 	}
 }
 

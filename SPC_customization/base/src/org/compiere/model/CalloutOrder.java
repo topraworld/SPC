@@ -1046,6 +1046,7 @@ public class CalloutOrder extends CalloutEngine
 				QtyOrdered = QtyEntered;
 			boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
 			MProductPricing pp = new MProductPricing (M_Product_ID, C_BPartner_ID, QtyOrdered, IsSOTrx);
+			
 			pp.setM_PriceList_ID(M_PriceList_ID);
 			int M_PriceList_Version_ID = Env.getContextAsInt(ctx, WindowNo, "M_PriceList_Version_ID");
 			pp.setM_PriceList_Version_ID(M_PriceList_Version_ID);

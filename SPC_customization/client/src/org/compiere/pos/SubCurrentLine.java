@@ -26,6 +26,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -177,6 +179,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		f_quantity.addActionListener(this);
 		add(f_quantity, "h 30:30:, w 100");
 		setQty(Env.ONE);
+		f_quantity.addFocusListener(this);
 		
 		//popup the letter keyboad
 		SwingUtilities.invokeLater(new Runnable()
@@ -200,7 +203,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		setPrice(Env.ZERO);
 		
 		enableButtons();
-	} //init
+	}
 
 
 	/**
@@ -216,42 +219,12 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 	 * @param e event
 	 */
 	public void actionPerformed(ActionEvent e) {
-		String action = e.getActionCommand();		
-		if (e.getSource() == f_name)
+		
+		String action = e.getActionCommand();
 		
 		if (action == null || action.length() == 0)
 			return;
-		log.info( "SubCurrentLine - actionPerformed: " + action);
 		
-		//	Plus
-		if (action.equals("Plus"))
-		{
-			if ( orderLineId > 0 )
-			{
-				MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
-				if ( line != null )
-				{
-					line.setQty(line.getQtyOrdered().add(Env.ONE));
-					line.saveEx();
-					p_posPanel.updateInfo();
-				}
-			}
-
-		}
-		//	Minus
-		else if (action.equals("Minus"))
-		{
-			if ( orderLineId > 0 )
-			{
-				MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
-				if ( line != null )
-				{
-					line.setQty(line.getQtyOrdered().subtract(Env.ONE));
-					line.saveEx();
-					p_posPanel.updateInfo();
-				}
-			}
-		}
 		//	VNumber
 		else if (e.getSource() == f_price)		{
 			MOrderLine line = new MOrderLine(p_ctx, orderLineId, null);
@@ -266,7 +239,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		{
 			this.setQty();
 		}
-		//	Product // change original source to OK
+		/*//	Product // change original source to OK
 		if (action.equals("Product"))
 		{
 			setParameter();
@@ -280,38 +253,11 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 			m_table.getSelectionModel().setSelectionInterval(row, row);
 			// https://sourceforge.net/tracker/?func=detail&atid=879332&aid=3121975&group_id=176962
 			m_table.scrollRectToVisible(m_table.getCellRect(row, 1, true)); //@Trifon - BF[3121975]
-		}
+		}*/
 		//	Name
 		else if (e.getSource() == f_name)
 			findProduct();
-		if ("Previous".equalsIgnoreCase(e.getActionCommand()))
-		{
-			int rows = m_table.getRowCount();
-			if (rows == 0) 
-				return;
-			int row = m_table.getSelectedRow();
-			row--;
-			if (row < 0)
-				row = 0;
-			m_table.getSelectionModel().setSelectionInterval(row, row);
-			// https://sourceforge.net/tracker/?func=detail&atid=879332&aid=3121975&group_id=176962
-			m_table.scrollRectToVisible(m_table.getCellRect(row, 1, true)); //@Trifon - BF[3121975]
-			return;
-		}
-		else if ("Next".equalsIgnoreCase(e.getActionCommand()))
-		{
-			int rows = m_table.getRowCount();
-			if (rows == 0)
-				return;
-			int row = m_table.getSelectedRow();
-			row++;
-			if (row >= rows)
-				row = rows - 1;
-			m_table.getSelectionModel().setSelectionInterval(row, row);
-			// https://sourceforge.net/tracker/?func=detail&atid=879332&aid=3121975&group_id=176962
-			m_table.scrollRectToVisible(m_table.getCellRect(row, 1, true)); //@Trifon - BF[3121975]
-			return;
-		}
+		
 		//	Delete
 		else if (action.equals("Cancel"))
 		{
@@ -552,8 +498,8 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		//	Set Result
 		if (results.length == 0)
 		{
-			String message = Msg.translate(p_ctx,  "search.product.notfound");
-			ADialog.warn(0, p_posPanel, message + query);
+			
+			ADialog.warn(0, this, "Canot find the entered product!");
 			setM_Product_ID(0);
 			p_posPanel.f_curLine.setPrice(Env.ZERO);
 		}
@@ -591,7 +537,6 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		p_posPanel.f_curLine.setPrice(results[0].getPriceStd());
 		saveLine();
 		f_quantity.requestFocusInWindow();
-		
 	}
 	
 	/**************************************************************************
@@ -625,15 +570,13 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 		}
 	}	//	setM_Product_ID
 	
-	/**
-	 * 	Focus Gained
-	 *	@param e
-	 */
-	public void focusGained (FocusEvent e)
-	{
-
+	
+	public void focusGained (FocusEvent e){
 		
-	}	//	focusGained
+		if(e.getSource().equals(f_quantity))
+			f_quantity.selectAll();
+		
+	}	
 		
 
 	/**
@@ -706,7 +649,7 @@ public class SubCurrentLine extends PosSubPanel implements ActionListener, Focus
 							line.setQty(entered);
 						else{
 							line.setQty(results[0].getQtyAvailable());
-							ADialog.info(Env.getWindowNo(this), this, "Insufficient Inventory: Available - " + results[0].getQtyAvailable());
+							ADialog.info(0, this, "Insufficient Inventory: Available - " + results[0].getQtyAvailable());
 						}
 					}	
 					else

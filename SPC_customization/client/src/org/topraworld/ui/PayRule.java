@@ -24,6 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.poi.ss.formula.ptg.TblPtg;
 import org.compiere.apps.ADialog;
 import org.compiere.model.MCash;
 import org.compiere.model.MCashLine;
@@ -80,6 +81,9 @@ public class PayRule extends JDialog implements ActionListener{
     private String total;
     private Cashier_SPC parent;
     private Trx trx;
+    private int C_Invoice_ID;
+    private BigDecimal cash;
+    private BigDecimal balance;
 
 	public PayRule(Cashier_SPC parent) {
     	
@@ -89,7 +93,7 @@ public class PayRule extends JDialog implements ActionListener{
     	this.parent = parent;
         initComponents();
         this.setLocationRelativeTo(null);
-        this.setTitle("Order Completion");
+        this.setTitle("Customer Payment");
     }
     
     
@@ -139,6 +143,9 @@ public class PayRule extends JDialog implements ActionListener{
         txtTotal = new JTextField();
         txtTotal.setActionCommand("txtTotal");
         txtTotal.addActionListener(this);
+        
+        //txtCardExpires.setEditable(false);
+        //txtCardName.setEditable(false);
         
         txtCashBillAmt = new javax.swing.JLabel();
         txtChqAccNo = new JTextField();
@@ -326,8 +333,6 @@ public class PayRule extends JDialog implements ActionListener{
         jLabel8.setPreferredSize(new java.awt.Dimension(40, 14));
         //
         this.setBankAccounts();
-        
-        
 
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel9.setText(" Routing No");
@@ -507,7 +512,9 @@ public class PayRule extends JDialog implements ActionListener{
 			jPanelCard.setVisible(true);
 			jPanelCash.setVisible(true);
 			jPanelCheque.setVisible(true);
-			btnPay.setEnabled(true);
+			btnPay.setEnabled(false);
+			txtCardAmount.setText("0.00");
+			txtChqAmount.setEditable(true);
 			this.getFocus(txtCash);
 			break;
 		//Cheque	
@@ -562,15 +569,32 @@ public class PayRule extends JDialog implements ActionListener{
 				this.dispose();
 				
 			}else if(action.equals("txtCash")){
-				this.setCashBalance();
 				
+				//Cash Payment
+				if(payMode.equals("B"))
+					this.setCashBalance();
+				//Mix Payment
+				else{
+					//set balance to card amount
+					BigDecimal total = new BigDecimal(txtTotal.getText());
+					BigDecimal cash = new BigDecimal(txtCash.getText().length()== 0?"0":txtCash.getText());
+					BigDecimal bal = total.subtract(cash);
+					bal = bal.setScale(2, RoundingMode.HALF_UP);
+					txtCardAmount.setText(bal.toString());
+					
+					//disable cash
+					txtCash.setEditable(txtCash.getText().length()!=0);
+					txtCardAmount.requestFocusInWindow();
+				}
 				
 			}else if(e.getSource().equals(txtCardNum)){
 				if(txtCardNum.getText().length()<1){
 					txtCardNum.setBackground(Color.pink);
 					txtCardNum.requestFocusInWindow();
-				}else
-					txtCardName.requestFocusInWindow();
+				}else{
+					btnPay.setEnabled(true);
+					btnPay.requestFocusInWindow();
+				}
 			}
 			
 			else if(e.getSource().equals(txtCardName))
@@ -581,8 +605,22 @@ public class PayRule extends JDialog implements ActionListener{
 				if(txtCardExpires.getText().length()<1){
 					txtCardExpires.setBackground(Color.pink);
 					txtCardExpires.requestFocusInWindow();
-				}else
-					btnPay.requestFocusInWindow();
+				}else{
+					if(payMode.equals("K")){
+						btnPay.requestFocusInWindow();
+					//Mix Payment	
+					}else{
+						//enable complete button Cash + Card
+						Double chq = Double.parseDouble(txtChqAmount.getText());
+						if(chq <= 0.00){
+							btnPay.setEnabled(true);
+							btnPay.requestFocusInWindow();
+						//With Cheque Payment	
+						}else{
+							txtChqRouting.requestFocusInWindow();
+						}
+					}
+				}	
 				
 			}else if(e.getSource().equals(txtChqRouting)){
 				
@@ -596,9 +634,22 @@ public class PayRule extends JDialog implements ActionListener{
 					txtChqCheckNo.setBackground(Color.pink);
 					txtChqCheckNo.requestFocusInWindow();
 				}else
+					btnPay.setEnabled(true);
 					btnPay.requestFocusInWindow();
 				
-			}else
+			}else if(e.getSource().equals(txtCardAmount)){
+				//Mix Payment
+				txtCardNum.requestFocusInWindow();
+				//Calculate Different for cheque
+				BigDecimal total = new BigDecimal(txtTotal.getText());
+				BigDecimal card = new BigDecimal(txtCardAmount.getText().length()== 0?"0":txtCardAmount.getText());
+				BigDecimal cash = new BigDecimal(txtCash.getText().length()== 0?"0":txtCash.getText());
+				BigDecimal bal = total.subtract(card.add(cash));
+				bal = bal.setScale(2, RoundingMode.HALF_UP);
+				txtChqAmount.setText(bal.toString());
+				txtChqAmount.setEditable(false);
+			}
+			else
 				return;
 			
 		}catch(Exception ex){
@@ -632,40 +683,84 @@ public class PayRule extends JDialog implements ActionListener{
 		}
 	}
 	
+	int count = 0;
 	private boolean completeOrder(){
 		
 		JTable orderTable =  this.parent.getOrderTable();
 		DefaultTableModel dtm = (DefaultTableModel) orderTable.getModel();
 		Properties		p_ctx = Env.getCtx();
 		boolean orderCompleted = false;
-		for (int i = 0 ; i < dtm.getRowCount() ; i++){
-			
+		count = dtm.getRowCount();
+		
+		cash = new BigDecimal(txtCash.getText().length() == 0?"0": txtCash.getText());
+		balance = new BigDecimal(txtCashBal.getText().length() == 0 ?"0": txtCashBal.getText());
+		
+		for (int i = 0 ; i <  count; i++){
 			MOrder mOrder = new MOrder(p_ctx, ((MOrder) dtm.getValueAt(i, 0)).get_ID(), trx.getTrxName());
 			try{
 				if (mOrder.getDocStatus().equals("DR") || mOrder.getDocStatus().equals("IP") ){
 					
+					mOrder.setPaymentRule(this.payMode);
 					mOrder.processIt(DocAction.ACTION_Complete);
 					mOrder.setDocAction(DocAction.ACTION_Close);
 					mOrder.setDocStatus(DocAction.ACTION_Complete);
 					mOrder.completeIt();
 					mOrder.save();
+					
 					trx.commit();
 					
 					//Create payments based on the payment rule
 					//Cash Payment
 					if(this.payMode.equals("B")){
-						orderCompleted = this.createCashLine(mOrder);
+						//set cash balances for mulpiple invoices
+						if(orderTable.getRowCount() == 1){
+							mOrder.set_ValueOfColumn("CASH_BALANCE", balance+"");
+							mOrder.set_ValueOfColumn("ORDERTYPE", cash+"");
+							//for many invoices	
+						}else{
+							if(count -1 != i){
+								mOrder.set_ValueOfColumn("CASH_BALANCE",cash+"");
+								mOrder.set_ValueOfColumn("ORDERTYPE", cash+"");
+								cash = cash.subtract(mOrder.getGrandTotal().setScale(2, RoundingMode.HALF_UP));
+							//last bill	
+							}else{
+								mOrder.set_ValueOfColumn("CASH_BALANCE", cash.subtract(mOrder.getGrandTotal()).setScale(2, RoundingMode.HALF_UP)+"");
+								mOrder.set_ValueOfColumn("ORDERTYPE", cash+"");
+							}
+						}
+					orderCompleted = this.createCashLine(mOrder , mOrder.getGrandTotal());
 					//Card Payment	
 					}else if(this.payMode.equals("K")){
 						if(this.validatepayment())
-							orderCompleted = this.createCardPayment(mOrder);
+							orderCompleted = this.createCardPayment(mOrder , mOrder.getGrandTotal());
 					//Mix Payment
 					}else if(this.payMode.equals("M")){
-					
+						if(this.validatepayment()){
+							
+							BigDecimal card = new BigDecimal(txtCardAmount.getText().length()== 0?"0":txtCardAmount.getText());
+							BigDecimal cash = new BigDecimal(txtCash.getText().length()== 0?"0":txtCash.getText());
+							BigDecimal cheque = new BigDecimal(txtChqAmount.getText().length()== 0?"0":txtChqAmount.getText());
+							
+							//Create cash Line
+							if(cash.compareTo(new BigDecimal(0)) > 0)
+								orderCompleted = this.createCashLine(mOrder , cash);
+							
+							//Create Card Payment
+							if(card.compareTo(new BigDecimal(0)) > 0)
+								orderCompleted = this.createCardPayment(mOrder , card);
+							
+							
+							if(cheque.compareTo(new BigDecimal(0)) > 0)
+								orderCompleted = this.createCheckPayment(mOrder , cheque);
+							
+							mOrder.setPaymentRule(X_C_Order.PAYMENTRULE_Mixed);
+							mOrder.save();
+							
+						}
 					//Cheque payment	
 					}else if(this.payMode.equals("S")){
 						if(this.validatepayment())
-							orderCompleted = this.createCardPayment(mOrder);
+							orderCompleted = this.createCheckPayment(mOrder , mOrder.getGrandTotal());
 					}
 					
 				}else{
@@ -682,10 +777,10 @@ public class PayRule extends JDialog implements ActionListener{
 				}
 				else if(mOrder.getDocStatus().equals("CO") ){
 					orderCompleted = true;
-					//print order
-					mOrder.setIsPrinted(this.parent.printReciept(mOrder));
 					mOrder.save();
 					trx.commit();
+					//print order
+					mOrder.setIsPrinted(this.parent.printReciept(mOrder));
 				}
 			}
 	    }
@@ -693,10 +788,14 @@ public class PayRule extends JDialog implements ActionListener{
 		return orderCompleted;
 	}
 	
-	private boolean createCashLine(MOrder mOrder){
+	private boolean createCashLine(MOrder mOrder , BigDecimal payAmount){
+		
+		//No need to create cash journal manually for pos orders except pos terminal created orders
+		if(mOrder.getC_POS_ID() == 0 && mOrder.getPaymentRule().equals(X_C_Order.PAYMENTRULE_Cash))
+			return true;
 		
 		boolean success = false;
-		BigDecimal payAmount = mOrder.getGrandTotal();
+		//BigDecimal payAmount = mOrder.getGrandTotal();
 		
 		mOrder.setPaymentRule(X_C_Order.PAYMENTRULE_Cash);
 		int newC_CashBook_ID =0;
@@ -746,46 +845,45 @@ public class PayRule extends JDialog implements ActionListener{
 				mOrder.saveEx(trx.getTrxName());
 			}
 		}
-		//SET CUSTOMER CASH BALANCE AMOUNT
-		mOrder.set_ValueOfColumn("CASH_BALANCE", txtCashBal.getText());
-		mOrder.set_ValueOfColumn("ORDERTYPE", txtCash.getText());
-		
-		mOrder.save();
-		
+
 		trx.commit();
 		return success;
 	}
 	
 	//Card payment
-	private boolean createCardPayment(MOrder mOrder){
+	private boolean createCardPayment(MOrder mOrder , BigDecimal payAmount){
 		
 		//set payment type
 		mOrder.setPaymentRule(X_C_Order.PAYMENTRULE_CreditCard);
 		MPayment payment = createPayment(mOrder , MPayment.TENDERTYPE_CreditCard);
-		payment.setAmount(mOrder.getC_Currency_ID(), mOrder.getGrandTotal());
+		payment.setAmount(mOrder.getC_Currency_ID(), payAmount);
 		
 		String cardtype = (cmbCardType.getSelectedItem().toString()).substring(0, 1);
 		//get bank account
 		KeyNamePair pair = (KeyNamePair) cmbbank.getSelectedItem();
 		payment.setC_BankAccount_ID(pair.getKey());
 		//payment.setCreditCard(MPayment.TRXTYPE_Sales,cardtype , cardNo, "", month, year);
-		payment.setCreditCard("S", cardtype, txtCardNum.getText(), "", txtCardExpires.getText());
+		//payment.setCreditCard("S", cardtype, txtCardNum.getText(), "", txtCardExpires.getText());
+		payment.setCreditCardType(cardtype);
+		payment.setCreditCardExp(txtCardExpires.getText());
+		payment.setCreditCardNumber(txtCardNum.getText());
 		payment.setA_Name(txtCardName.getText());
-		payment.saveEx();
 		payment.setDocAction(MPayment.DOCACTION_Complete);
 		payment.setDocStatus(MPayment.DOCSTATUS_Drafted);
+		payment.saveEx();
 		if ( payment.processIt(MPayment.DOCACTION_Complete) )
 		{
 			payment.saveEx();
 			return true;
-		}else return false;
+		}else 
+			return false;
 	}
 	
-	public boolean createCheckPayment(MOrder mOrder){ 
+	public boolean createCheckPayment(MOrder mOrder ,BigDecimal payAmount){
 	
 		mOrder.setPaymentRule(X_C_Order.PAYMENTRULE_Check);
 		MPayment payment = createPayment(mOrder ,MPayment.TENDERTYPE_Check);
-		payment.setAmount(mOrder.getC_Currency_ID(), mOrder.getGrandTotal());
+		payment.setAmount(mOrder.getC_Currency_ID(), payAmount);
 		//set bank account
 		KeyNamePair pair = (KeyNamePair) cmbbank.getSelectedItem();
 		payment.setC_BankAccount_ID(pair.getKey());
@@ -812,29 +910,17 @@ public class PayRule extends JDialog implements ActionListener{
 		payment.setC_Order_ID(mOrder.get_ID());
 		payment.setIsReceipt(true);
 		payment.setC_BPartner_ID(mOrder.getC_BPartner_ID());
+		//set invoice
+		payment.setC_Invoice_ID(this.getInvoiceID(mOrder.get_ID(), trx.getTrxName()));
 		return payment;
 	}
 		
 	private static int getInvoiceID (int C_Order_ID, String trxName)
 	{
-		int retValue = 0;
+		
 		String sql = "SELECT C_Invoice_ID FROM C_Invoice WHERE C_Order_ID=? "
 			+ "ORDER BY C_Invoice_ID DESC";     //  last invoice
-		try
-		{
-			PreparedStatement pstmt = DB.prepareStatement(sql, trxName);
-			pstmt.setInt(1, C_Order_ID);
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next())
-				retValue = rs.getInt(1);
-			rs.close();
-			pstmt.close();
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-		return retValue;
+		return DB.getSQLValue(trxName, sql, C_Order_ID);
 	}
 	
 	private void setBankAccounts(){
@@ -861,8 +947,6 @@ public class PayRule extends JDialog implements ActionListener{
 	
 	private boolean validatepayment(){
 		
-		
-		
 		boolean isValid = true;
 		//Card
 		if(this.payMode.equals("K")){
@@ -873,11 +957,11 @@ public class PayRule extends JDialog implements ActionListener{
 				txtCardNum.requestFocusInWindow();
 				
 			}	
-			if(txtCardExpires.getText().length() == 0){
+			/*if(txtCardExpires.getText().length() == 0){
 				txtCardExpires.setBackground(Color.pink);
 				isValid = false;
 				txtCardExpires.requestFocusInWindow();
-			}
+			}*/
 			
 		//Cheque	
 		}else if(this.payMode.equals("S")){
@@ -889,6 +973,17 @@ public class PayRule extends JDialog implements ActionListener{
 		//Mix	
 		}else if(this.payMode.equals("M")){
 			
+			//Total Balance
+			BigDecimal total = new BigDecimal(txtTotal.getText());
+			BigDecimal card = new BigDecimal(txtCardAmount.getText().length()== 0?"0":txtCardAmount.getText());
+			BigDecimal cash = new BigDecimal(txtCash.getText().length()== 0?"0":txtCash.getText());
+			BigDecimal cheque = new BigDecimal(txtChqAmount.getText().length()== 0?"0":txtChqAmount.getText());
+			
+			total = total.subtract((card.add(cash).add(cheque)));
+			if(total.compareTo(new BigDecimal(0))>0){
+				isValid = false;
+				ADialog.error(0, this, "Mix payment Error","Insuficient Amount");
+			}	
 		}
 		
 		return isValid;

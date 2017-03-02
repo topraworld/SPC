@@ -419,5 +419,9 @@ public class PosBasePanel extends CPanel
 	public String getTrxName(){
 		return trxName;
 	}
+	
+	public CFrame getCFrame(){
+		return this.frame;
+	}
 }	//	PosPanel
 

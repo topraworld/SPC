@@ -36,6 +36,7 @@ import org.compiere.model.MOrder;
 import org.compiere.model.MOrderLine;
 import org.compiere.print.ReportCtl;
 import org.compiere.print.ReportEngine;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Trx;
 
@@ -72,6 +73,7 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
     private JButton btnUp;
     private Trx trx;
     private Properties ctx;
+    private BigDecimal start;
 	
 	@Override
 	public void init(int WindowNo, FormFrame frame) {
@@ -109,8 +111,6 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
         rbnCheque = new javax.swing.JRadioButton();
         rbnCard = new javax.swing.JRadioButton();
         rbnMix = new javax.swing.JRadioButton();
-        
-        rbnMix.setEnabled(false);
         
         rbnCash.addActionListener(this);
         rbnCheque.addActionListener(this);
@@ -469,14 +469,14 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
             }
         });
         
-        //Open Cash Drawer
+        /*//Open Cash Drawer
         this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0),"VK_F3");
         this.frame.getRootPane().getActionMap().put("VK_F3",new AbstractAction(){
             public void actionPerformed(ActionEvent ae)
             {	
             	openCashDrawer();
             }
-        });
+        });*/
         
         //Delete Lines
         this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed D"), "Delete");
@@ -489,8 +489,8 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
         });
         
         //Payment mode Cash
-        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed N"), "Cash");
-        rbnCash.setToolTipText("Press Ctl + N");
+        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed 1"), "Cash");
+        rbnCash.setToolTipText("Press Ctl + 1");
         this.frame.getRootPane().getActionMap().put("Cash",new AbstractAction(){
             public void actionPerformed(ActionEvent ae)
             {	
@@ -500,8 +500,8 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
         });
         
         //Payment mode Cheque
-        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed Z"), "Cheque");
-        rbnCheque.setToolTipText("Press Ctl + Z");
+        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed 4"), "Cheque");
+        rbnCheque.setToolTipText("Press Ctl + 4");
         this.frame.getRootPane().getActionMap().put("Cheque",new AbstractAction(){
             public void actionPerformed(ActionEvent ae)
             {	
@@ -511,8 +511,8 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
         });
         
         //Payment mode Mix
-        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed M"), "Miix");
-        rbnMix.setToolTipText("Press Ctl + M");
+        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed 3"), "Mix");
+        rbnMix.setToolTipText("Press Ctl + 3");
         this.frame.getRootPane().getActionMap().put("Mix",new AbstractAction(){
             public void actionPerformed(ActionEvent ae)
             {	
@@ -521,9 +521,9 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
         });
         
         //Payment mode Card
-        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed B"), "Mix");
-        rbnCard.setToolTipText("Press Ctl + B");
-        this.frame.getRootPane().getActionMap().put("Mix",new AbstractAction(){
+        this.frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl pressed 2"), "Card");
+        rbnCard.setToolTipText("Press Ctl + 2");
+        this.frame.getRootPane().getActionMap().put("Card",new AbstractAction(){
             public void actionPerformed(ActionEvent ae)
             {	
             	rbnCard.doClick();
@@ -588,12 +588,24 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 					this.setSum();
 				}
 			}else if(action.equals("Cash")){
+				
+				if(!isValidPaymentMode(action)){
+					rbnCash.setSelected(false);
+					return;
+				}	
+				
 				rbnCash.setSelected(true);
 				rbnCard.setSelected(false);
 				rbnCheque.setSelected(false);
 				rbnMix.setSelected(false);
 				
 			}else if(action.equals("Card")){
+				
+				if(!isValidPaymentMode(action)){
+					rbnCard.setSelected(false);
+					return;
+				}	
+				
 				rbnCash.setSelected(false);
 				rbnCard.setSelected(true);
 				rbnCheque.setSelected(false);
@@ -601,11 +613,30 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 				
 			}else if(action.equals("Mix")){
 				
-				rbnCash.setSelected(false);
-				rbnCard.setSelected(false);
-				rbnCheque.setSelected(false);
-				rbnMix.setSelected(true);
+				//avoid multiple invoice payment
+				if(tblOrders.getRowCount() <= 1){
+					
+					if(!isValidPaymentMode(action)){
+						rbnMix.setSelected(false);
+						return;
+					}
+					
+					rbnCash.setSelected(false);
+					rbnCard.setSelected(false);
+					rbnCheque.setSelected(false);
+					rbnMix.setSelected(true);
+				}else{
+					rbnMix.setSelected(false);
+					ADialog.error(0,this.frame, "Your are not allowed to create mix payment for multiple invoices!");
+				}
+				
 			}else if(action.equals("Cheque")){
+				
+				if(!isValidPaymentMode(action)){
+					rbnCheque.setSelected(false);
+					return;
+				}	
+				
 				rbnCash.setSelected(false);
 				rbnCard.setSelected(false);
 				rbnCheque.setSelected(true);
@@ -618,32 +649,79 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 		}
 	}
 	
+	private boolean isValidPaymentMode(String action){
+		
+		int ws = 1000053;
+		int ps = 1000039;
+		
+		boolean isvalid = false;
+		//Mix payment allow for general customer
+		//No discount
+		double dis = Double.parseDouble(txtDiscount.getText());
+		if(dis == 0.00)
+			isvalid = true;
+		else if(dis > 0.00 && rbnCash.isSelected() && !(action.equals("Cash"))){
+			//with 5% discount mix are not possible
+			isvalid = false;
+		}else{
+			isvalid = true;
+		}
+		
+		//check order type is whole sale
+		if(!isvalid){
+			DefaultTableModel dtm = (DefaultTableModel) tblOrders.getModel();
+			Properties		p_ctx = Env.getCtx();
+			int count = dtm.getRowCount();
+			for (int i = 0 ; i <  count; i++){
+				MOrder mOrder = new MOrder(p_ctx, ((MOrder) dtm.getValueAt(i, 0)).get_ID(), trx.getTrxName());
+			 	if(mOrder.getC_DocTypeTarget_ID() == ws)
+			 		isvalid = true;
+			}
+			
+		}
+		
+		if(!isvalid)
+			ADialog.error(0,this.frame, "Payment type error!");
+		
+		return isvalid;
+	}
+	
 	private void addLine(){
 		
 		boolean isReturn = false;
 		String DOCUMENTNO = txtDocNo.getText().trim();
-		int  ids[] = MOrder.getAllIDs("C_ORDER", "DOCUMENTNO = '"+ DOCUMENTNO +"' AND DOCSTATUS = 'DR'", trx.getTrxName());
+		String sql = "SELECT C_ORDER_ID FROM C_ORDER WHERE DOCUMENTNO = ?";
+		int C_Order_ID = DB.getSQLValue(trx.getTrxName(), sql, DOCUMENTNO);
+		MOrder mOrder = new MOrder(ctx, C_Order_ID, trx.getTrxName());
 		
-		if(ids.length > 0){
-			MOrder mOrder = new MOrder(ctx, ids[0], trx.getTrxName());
-			//Check whether order is type return
-			if(mOrder.getC_DocTypeTarget_ID() == 1000050)
-				isReturn = true;
-			//POS Order
-			if(!isReturn)
-				this.createTableLine(mOrder);
-			//Return
-			else{
-				//Manager Aproval
-				if(mOrder.get_ValueAsBoolean("wf_returnaproval")){
+		if(C_Order_ID > 0){
+			//Validate docstatus
+			if(mOrder.getDocStatus().equals("DR") || mOrder.getDocStatus().equals("IP")){
+				//Check whether order is type return
+				if(mOrder.getC_DocTypeTarget_ID() == 1000050)
+					isReturn = true;
+				//POS Order
+				if(!isReturn)
 					this.createTableLine(mOrder);
-				}else{
-					ADialog.error(0,this.frame, "MANAGER APROVAL REQUIRED!" , "It is required manager aproval to process this order!");
+				//Return
+				else{
+					//Manager Aproval
+					if(mOrder.get_ValueAsBoolean("wf_returnaproval")){
+						this.createTableLine(mOrder);
+					}else{
+						ADialog.error(0,this.frame, "MANAGER APROVAL REQUIRED!" , "It is required manager aproval to process this order!");
+					}
 				}
+			}else if(mOrder.getDocStatus().equals("CO")){
+				ADialog.error(0,this.frame, "STOP!","Already Completed Order");	
+			}else if(mOrder.getDocStatus().equals("VO")){
+				ADialog.error(0,this.frame, "STOP!","Voided Order");
+			}else{
+				ADialog.error(0,this.frame, "Invalid Document status" ,"An error with your order. Please contact system administrator!");
 			}
 			
 		}else{
-			ADialog.warn(0,this.frame, "Invalid Document No!");
+			ADialog.warn(0,this.frame, "Canot find this order!");
 			txtDocNo.setText("");
 		}
 	}
@@ -697,12 +775,12 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 	    	//loop through each order lines
 	    	MOrderLine[] lines = mOrder.getLines();
 	    	for(MOrderLine mOrderLine : lines){
-	    		gt = gt.add(mOrderLine.getPriceList().multiply(mOrderLine.getQtyEntered()));
-	    		nt = nt.add(mOrderLine.getPriceActual().multiply(mOrderLine.getQtyEntered()));
+	    		gt = gt.add(mOrderLine.getPriceList().multiply(mOrderLine.getQtyOrdered()));
+	    		nt = nt.add(mOrderLine.getPriceActual().multiply(mOrderLine.getQtyOrdered()));
 	    	}
-	    	gt =  gt.setScale(2, RoundingMode.HALF_DOWN);
-	    	nt =  nt.setScale(2, RoundingMode.HALF_DOWN);
-	    	dis = gt.subtract(nt);
+	    	gt =  gt.setScale(1, RoundingMode.HALF_UP);
+	    	nt =  nt.setScale(1, RoundingMode.HALF_UP);
+	    	dis = gt.subtract(nt).setScale(1, RoundingMode.HALF_UP);;
 	    }
 	    
 	    txtGrossTotal.setText(gt + "");
@@ -811,7 +889,7 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 	public void keyPressed(KeyEvent e) { }
 	
 	//This is for the barcode reader
-	BigDecimal start = null;
+	
 	@Override
 	public void keyReleased(KeyEvent e) {		
 		if(txtDocNo.getText().length() == 1)
@@ -826,12 +904,9 @@ public class Cashier_SPC implements FormPanel , ActionListener , KeyListener{
 	}
 	
 	private boolean isValidPayRule(){
-		
 		boolean isvalid = false;
-		//Validation is done based on the Order payment rule and the discount
-		//Cash to Card is valid any time if no discounts
 		
-		
+		//
 		
 		
 		return isvalid;
